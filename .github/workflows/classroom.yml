@@ -1,0 +1,44 @@
+name: Autograding Tests
+'on':
+- push
+- repository_dispatch
+permissions:
+  checks: write
+  actions: read
+  contents: read
+jobs:
+  run-autograding-tests:
+    runs-on: ubuntu-latest
+    if: github.actor != 'github-classroom[bot]'
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    - name: test_has_adjacent_duplicate.py
+      id: test_has_adjacent_duplicate-py
+      uses: classroom-resources/autograding-python-grader@v1
+      with:
+        timeout: 10
+        max-score: 5
+        setup-command: pip install pytest
+    - name: test_swap_ends.py
+      id: test_swap_ends-py
+      uses: classroom-resources/autograding-python-grader@v1
+      with:
+        timeout: 10
+        max-score: 5
+        setup-command: pip install pytest
+    - name: test_breakdown_time.py
+      id: test_breakdown_time-py
+      uses: classroom-resources/autograding-python-grader@v1
+      with:
+        timeout: 10
+        max-score: 5
+        setup-command: pip install pytest
+    - name: Autograding Reporter
+      uses: classroom-resources/autograding-grading-reporter@v1
+      env:
+        TEST_HAS_ADJACENT_DUPLICATE-PY_RESULTS: "${{steps.test_has_adjacent_duplicate-py.outputs.result}}"
+        TEST_SWAP_ENDS-PY_RESULTS: "${{steps.test_swap_ends-py.outputs.result}}"
+        TEST_BREAKDOWN_TIME-PY_RESULTS: "${{steps.test_breakdown_time-py.outputs.result}}"
+      with:
+        runners: test_has_adjacent_duplicate-py,test_swap_ends-py,test_breakdown_time-py
